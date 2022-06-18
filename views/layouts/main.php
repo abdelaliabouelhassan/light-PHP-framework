@@ -7,10 +7,10 @@
     <title>fuckers</title>
 </head>
 <body>
-        <h1>welcome to fucker framwork</h1>
+        <h1>welcome to boystack framwork</h1>
 
         {{content}}
 
-        <h5>footer fuckers</h5>
+        <h5>footer</h5>
 </body>
 </html>

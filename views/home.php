@@ -1,1 +1,1 @@
-<h2>the fucking home page are you fucking retard  </h2>
+<h2>the boystack home page  </h2>
