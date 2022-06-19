@@ -78,7 +78,11 @@ class Router
     }
 
     public function renderOnlyView($view, $data)
-    {
+    {   
+        $errors = [];
+       
+        $errors = Session::get('flash_errors');
+        Session::remove('flash_errors');
         $data  = $data;
         foreach ($data as $key => $value) {
             $$key = $value;
