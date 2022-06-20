@@ -1,7 +1,11 @@
 <form action="/register" method="post">
+
     <?php
+   
       foreach((array) $errors as $error) {
-        echo $error;
+         foreach((array) $error as $error) {
+            echo '<p>' . $error . '</p>';
+         }
       }
     ?>
 <input type="text" name="name" placeholder="user name">

@@ -4,20 +4,21 @@ namespace App\core;
 
 class DataBase {
 
-        private $host;
-        private $dbname;
-        private $user;
-        private $password;
-        private $pdo;
+        public $host;
+        public $dbname;
+        public $user;
+        public $password;
+        public $pdo;
 
      
         public function __construct()
         {
-            $this->host = 'localhost';
-            $this->dbname = 'boystack';
-            $this->user = 'root';
-            $this->password = '';
+            $this->host = env('DB_HOST');
+            $this->dbname = env('DB_NAME');
+            $this->user = env('DB_USER');
+            $this->password = env('DB_PASSWORD');
             $this->pdo = new \PDO("mysql:host={$this->host};dbname={$this->dbname}", $this->user, $this->password);
+            $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         }
 
 
@@ -79,5 +80,71 @@ class DataBase {
         {
             return $this->pdo->errorCode();
         }
+
+
+        public function applayMigrations()
+        {
+          $this->createMigrationsTable();
+          $appliedMigrations =  $this->getAppliedMigrations();
+            
+          $newMigrations = [];
+          $files = scandir(Application::$DIR_ROOT . '/database/migrations');
+          $files = array_slice($files, 2); //remove . and ..
+          $toAppliedMigrations = array_diff($files, $appliedMigrations); //get the difference between files and applied migrations
+            foreach ($toAppliedMigrations as $migrations) {
+                $this->applyMigration($migrations); // apply the migration
+                $newMigrations[]  = $migrations;
+            }
+
+            echo "Applied migrations fuck: " . implode(', ', $toAppliedMigrations) . PHP_EOL;
+            
+            // if(!empty($newMigrations)) {
+            //     $this->saveMigrations($newMigrations);
+            // }else{
+            //     echo 'No new migrations found ' . PHP_EOL;
+            // }
+
+        }
+
+        public function createMigrationsTable()
+        {
+            $sql = "CREATE TABLE IF NOT EXISTS `migrations` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `name` varchar(255) NOT NULL,
+                `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+            $this->exec($sql);
+        }
+
+        public function getAppliedMigrations()
+        {
+            $sql = "SELECT * FROM `migrations`";
+            $stmt = $this->query($sql);
+            $migrations = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $migrations;
+        }
+
+        public function applyMigration($migration)
+        {
+            require_once Application::$DIR_ROOT . '/database/migrations/' . $migration;
+            $className = pathinfo($migration, PATHINFO_FILENAME); //get the filename without extension
+            $instance = new $className();
+            echo "Applying migration: " . $migration . PHP_EOL;
+            $instance->up();
+            echo "Migration applied: " . $migration . PHP_EOL;
+
+        }
+
+
+        public function saveMigrations(array $migrations)
+        {
+            $sql = "INSERT INTO `migrations` (`name`) VALUES (?)";
+            $stmt = $this->prepare($sql);
+            foreach ($migrations as $migration) {
+                $stmt->execute([$migration]);
+            }
+        }
+     
 
 }
