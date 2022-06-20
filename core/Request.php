@@ -278,12 +278,18 @@ class Request extends Session
             }
         }
 
+        
+
+
 
         // if there is errors redirect back to the form
         if (count($errors) > 0) {
             // set the errors to session flashdata
             $this->flash('errors', $errors);
-        
+            //set values in session
+            foreach ($body as $key => $value) {
+                $this->flash( 'values_' . $key, $value);
+            }
             header('Location: ' . $_SERVER['HTTP_REFERER']);
         }else{
             return true;

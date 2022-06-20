@@ -18,12 +18,14 @@ class Application
     public Controller $controller;
     public static Application $app;
     public DataBase $db;
+    public Session $session;
     public function __construct()
     {
         $this->request = new Request();
         $this->response = new Response();
         $this->router = new Router($this->request, $this->response);
         $this->db = new DataBase();
+        $this->session = new Session();
         self::$app = $this;
         self::$DIR_ROOT = dirname(__DIR__);
     }
